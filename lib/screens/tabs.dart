@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 //import 'package:learnflutter/data/dummy_data.dart';
-import 'package:learnflutter/models/meal.dart';
+import 'package:learnflutter/providers/favorites_provider.dart';
 import 'package:learnflutter/providers/filters_provider.dart';
-import 'package:learnflutter/providers/meals_provider.dart';
 import 'package:learnflutter/screens/categories.dart';
 import 'package:learnflutter/screens/filters.dart';
 import 'package:learnflutter/screens/meals.dart';
@@ -18,7 +17,6 @@ class TabsScreen extends ConsumerStatefulWidget {
 
 class _TabsScreenState extends ConsumerState<TabsScreen> {
   int _selectedPageIndex = 0;
-  final List<Meal> _favoriteMeals = [];
 
   void selectPage(index) {
     setState(() {
@@ -37,30 +35,15 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final meals = ref.watch(mealsProvider);
-    final activeFilters = ref.watch(filtersProvider);
-    final availableMeals = meals.where((meal){
-      if(activeFilters[Filters.glutenFree]! && !meal.isGlutenFree){
-        return false;
-      }
-      if(activeFilters[Filters.lactoseFree]! && !meal.isLactoseFree){
-        return false;
-      }
-      if(activeFilters[Filters.vegetarian]! && !meal.isVegetarian){
-        return false;
-      }
-      if(activeFilters[Filters.vegan]! && !meal.isVegan){
-        return false;
-      }
-      return true;
-    }).toList();
+    final availableMeals = ref.watch(filteredMealsProvider);
     Widget activePage = CategoriesScreen(
       availableMeals: availableMeals,
     );
     var activePageTitle = "Categories";
     if (_selectedPageIndex == 1) {
+      final favoriteMeals = ref.watch(favoritesProvider);
       activePage = MealsScreen(
-        meals: _favoriteMeals,
+        meals: favoriteMeals,
       );
       activePageTitle = "Your Favorites";
     }
